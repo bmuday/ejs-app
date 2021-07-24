@@ -1,5 +1,5 @@
 {
-  "name": "mern-app",
+  "name": "ejs-app",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -10,15 +10,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bmuday/_jwt-auth1.git"
+    "url": "git+https://github.com/bmuday/ejs-app.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bmuday/_jwt-auth1/issues"
+    "url": "https://github.com/bmuday/ejs-app/issues"
   },
-  "homepage": "https://github.com/bmuday/_jwt-auth1#readme",
+  "homepage": "https://github.com/bmuday/ejs-app#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "concurrently": "^6.0.2",
