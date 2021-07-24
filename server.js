@@ -1,28 +1,28 @@
 const express = require("express");
 const app = express();
 
+const PORT = process.env.PORT || 5000;
+
 // HTTP Request Logger
 const logger = require("morgan");
 
 //Database connection
 const db = require("./db");
 
-const PORT = process.env.PORT || 5000;
-
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(logger("tiny"));
 
-// Import routes
-const authRoute = require("./routes/auth");
-const postRoute = require("./routes/posts");
-
 // Route middlewares
-app.use("/api/user", authRoute);
-app.use("/api/posts", postRoute);
+// Import routes
+const userRoute = require("./routes/user");
+const postRoute = require("./routes/post");
+
+app.use("/api/user", userRoute);
+app.use("/api/post", postRoute);
 
 // Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}...`);
+  console.log(`Server runnning on port ${PORT}...`);
 });
