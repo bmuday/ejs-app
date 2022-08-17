@@ -1,80 +1,88 @@
 const User = require("../models/User");
-const {
-  registerValidation,
-  loginValidation,
-} = require("../routes/middlewares/validation");
-
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const userRegistration = async (req, res) => {
-  const { error, value } = registerValidation(req.body);
+// Errors
+const handleErrors = (err) => {
+  console.log(err.message, err.code);
+  let errors = {
+    username: "",
+    email: "",
+    password: "",
+  };
 
-  if (error) return res.status(400).send(error.details[0].message);
+  if (err.message === "Incorrect username") {
+    errors.username = "That username is not registered";
+  } else if (err.message === "Incorrect password") {
+    errors.password = "That password is incorrect";
+  }
 
-  const { username, email, password } = value;
+  // Duplicate error code
+  if (err.code === 11000) {
+    if (err.message.includes("username")) {
+      errors.username =
+        "That username is already used. Please choose another one.";
+    } else if (err.message.includes("email")) {
+      errors.email =
+        "That email is already registered. Please login or choose another one.";
+    }
+  }
 
-  // Checking if the user is already in the database
-  const emailExists = await User.findOne({ email });
-  if (emailExists)
-    return res
-      .status(400)
-      .send("Email already exists. Please log in with your account.");
+  // Validation errors
+  if (err.message.includes("User validation failed")) {
+    Object.values(err.errors).forEach(({ properties }) => {
+      errors[properties.path] = properties.message;
+    });
+  }
 
-  const usernameExists = await User.findOne({ username });
-  if (usernameExists)
-    return res
-      .status(400)
-      .send("Username already exists. Please choose another one.");
+  return errors;
+};
 
-  // Hashing password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  const user = new User({
-    username,
-    email,
-    password: hashedPassword,
+// Create and assign a token
+const maxAge = 2 * 60; // in seconds
+const createToken = (id) => {
+  return jwt.sign({ id }, process.env.TOKEN_SECRET, {
+    expiresIn: maxAge,
   });
+};
+
+// Register
+const userRegister = async (req, res) => {
+  const { username, email, password } = req.body;
+
+  // Create the user
   try {
-    await user.save();
-    res.status(200).send({ user: user._id });
+    const user = await User.create({ username, email, password });
+    const token = createToken(user._id);
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 }); // maxAge in milliseconds
+    res.status(201).send({ user });
   } catch (err) {
-    res.status(400).send(err);
+    const errors = handleErrors(err);
+    res.status(401).json({ message: "User not created", errors });
   }
 };
 
+// Login
 const userLogin = async (req, res) => {
-  const { error, value } = loginValidation(req.body);
+  const { username, password } = req.body;
 
-  if (error) return res.status(400).send(error.details[0].message);
-
-  const { email, password } = value;
-
-  // Checking if the email is already in the database
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).send("Bad credentials. Try again.");
-
-  //Checking if password is correct
-  const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) return res.status(400).send("Wrong password.");
-
-  // Create and assign a token
-  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
-    expiresIn: "2min",
-  });
-
-  /* res.cookie("jwt", token, { httpOnly: true }); */
-  res.header("auth-token", token);
-  res.send("User logged in!");
+  try {
+    const user = await User.login(username, password);
+    const token = createToken(user._id);
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 }); // maxAge in milliseconds
+    res.status(200).json({ user });
+  } catch (err) {
+    const errors = handleErrors(err);
+    res.status(400).json({ message: "User not logged in", errors });
+  }
 };
 
 const userLogout = async (req, res) => {
-  /* res.cookie("jwt", "", { maxAge: 1 }); */
+  res.cookie("jwt", "", { maxAge: 1 });
+  res.redirect("/");
 };
 
 module.exports = {
-  userRegistration,
+  userRegister,
   userLogin,
   userLogout,
 };
