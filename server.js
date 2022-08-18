@@ -6,7 +6,8 @@ const PORT = process.env.PORT || 5000;
 // HTTP Request Logger
 const logger = require("morgan");
 //Database connection
-const db = require("./db");
+require("./db");
+
 // Parse Cookies
 const cookieParser = require("cookie-parser");
 const auth = require("./middlewares/auth");

@@ -38,7 +38,7 @@ const handleErrors = (err) => {
 };
 
 // Create and assign a token
-const maxAge = 2 * 60; // in seconds
+const maxAge = 5 * 60; // in seconds
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.TOKEN_SECRET, {
     expiresIn: maxAge,
@@ -66,6 +66,7 @@ const userLogin = async (req, res) => {
   const { username, password } = req.body;
 
   try {
+    console.log(username, password);
     const user = await User.login(username, password);
     const token = createToken(user._id);
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 }); // maxAge in milliseconds

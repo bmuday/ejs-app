@@ -81,16 +81,17 @@ label {
   margin: 20px 0 10px;
 }
 button {
-  margin-top: 30px;
-  border-radius: 36px;
-  background: #fee996;
-  border: 0;
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 0.8em;
+  cursor: pointer;
   display: block;
   padding: 10px 16px;
+  margin-top: 30px;
+  border-radius: 16px;
+  background: #fee996;
+  border: 0;
+  font-weight: 700;
+  font-size: 0.8em;
   letter-spacing: 2px;
+  text-transform: uppercase;
 }
 .error {
   color: #ff0099;
